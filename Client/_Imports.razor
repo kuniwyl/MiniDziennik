@@ -1,0 +1,20 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using Dziennik.Client
+@using Dziennik.Client.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Dziennik.Shared
+@using Dziennik.Client.Authentication;
+
+@inject IUserService userService
+@inject NavigationManager navMaganer
+@inject AuthenticationStateProvider authStateProvider
+@inject HttpClient httpClient
+@inject IJSRuntime js

@@ -1,0 +1,51 @@
+﻿@page "/login"
+
+<div class="">
+    <div class="row my-4 justify-content-md-center">
+        <h3 class="col-12 text-center col-md-8 col-sm-12">Zaloguj się do systemu</h3>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label>Nazwa użytkownika</label>
+            <input @bind="loginRequest.UserName" class="form-control" placeholder="Nazwa użytkownika" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Hasło</label>
+            <input @bind="loginRequest.Password" type="password" class="form-control" placeholder="Hasło" />
+        </div>
+    </div>
+
+    <div class="row my-3 justify-content-center">
+        <div class="col-8 col-sm-6 col-md-4 col-xl-2">
+            <button @onclick="Authenticate" class="d-block w-100 btn btn-dark mx-auto">Login</button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    private LoginRequest loginRequest = new LoginRequest();
+
+    private async Task Authenticate()
+    {
+        var loginReponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/auth/login", loginRequest);
+
+        if (loginReponse.IsSuccessStatusCode )
+        {
+            var userSession = await loginReponse.Content.ReadFromJsonAsync<UserSession>();
+            var custopAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+            await custopAuthStateProvider.UpdateAuthenticationState(userSession);
+            navMaganer.NavigateTo("/", true);
+        }
+        else if (loginReponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid UserName or Password");
+            return;
+        }
+    }
+}

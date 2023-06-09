@@ -1,0 +1,65 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container dark">
+        
+        <a class="navbar-brand" @onclick="NavigateToIndex">Dziennik</a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <AuthorizeView Roles="HeadAdmin,Teacher">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="NavigateToStudents">Uczniowie</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="NavigateToTeachers">Nauczyciele</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="NavigateToSubjects">Zajęcia</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" @onclick="NavigateToMarks">Oceny</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+
+            <AuthorizeView>
+                <Authorized>
+                    <button class="btn btn-dark" @onclick="Logout">
+                        Wyloguj
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <button class="btn btn-dark" @onclick="NavigateToLogin">
+                        Logowanie
+                    </button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private void NavigateToIndex() => navMaganer.NavigateTo("/");
+    private void NavigateToStudents() => navMaganer.NavigateTo("/students");
+    private void NavigateToTeachers() => navMaganer.NavigateTo("/teachers");
+    private void NavigateToSubjects() => navMaganer.NavigateTo("/subjects");
+    private void NavigateToMarks() => navMaganer.NavigateTo("/marks");
+    private void NavigateToLogin() => navMaganer.NavigateTo("/login");
+
+    private async void Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navMaganer.NavigateTo("/", true);
+    }
+}

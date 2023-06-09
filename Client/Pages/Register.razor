@@ -1,0 +1,102 @@
+﻿@page "/register"
+
+<div class="">
+    <div class="row my-4 justify-content-md-center">
+        <h3 class="col-12 text-center col-md-8 col-sm-12">Rejestracja</h3>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label>Imie</label>
+            <input @bind="userRequest.FirstName" class="form-control" placeholder="Imię" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Nazwisko</label>
+            <input @bind="userRequest.LastName" class="form-control" placeholder="Nazwisko" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Login</label>
+            <input @bind="userRequest.Login" class="form-control" placeholder="Login" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Email</label>
+            <input @bind="userRequest.Email" class="form-control" placeholder="Email" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Hasło</label>
+            <input @bind="userRequest.Password" type="password" class="form-control" placeholder="Hasło" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Powtórz hasło</label>
+            <input @bind="rePassword" type="password" class="form-control" placeholder="Powtórz hasło" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Data urodzenia</label>
+            <input @bind="userRequest.Birthday" type="date" class="form-control" placeholder="Data urodzenia" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12  col-sm-8 col-md-6">
+            <label>Rola</label>
+            <input @bind="userRequest.Role" class="form-control" placeholder="Rola" />
+        </div>
+    </div>
+
+    <div class="row my-3 justify-content-center">
+        <div class="col-8 col-sm-6 col-md-4 col-xl-2">
+            <button @onclick="RegisterButton" class="d-block w-100 btn btn-dark mx-auto">Login</button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private UserRequest userRequest { get; set; } = new UserRequest();
+    private string rePassword { get; set; } = string.Empty;
+
+    private async Task RegisterButton()
+    {
+        if (userRequest.Password == rePassword)
+        {
+            var res = await httpClient.PostAsJsonAsync<UserRequest>("/api/auth/register", userRequest);
+
+            if (res.IsSuccessStatusCode)
+            {
+                var userSession = await res.Content.ReadFromJsonAsync<UserSession>();
+                var custopAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+                await custopAuthStateProvider.UpdateAuthenticationState(userSession);
+                navMaganer.NavigateTo("/", true);
+            }
+            else if (res.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await js.InvokeVoidAsync("alert", "Błędne dane");
+                return;
+            }
+        } 
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Hasła się nie zgadzają");
+            return;
+        }
+    }
+
+}

@@ -1,0 +1,16 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+
+<div>
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+}

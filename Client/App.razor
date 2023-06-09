@@ -1,0 +1,16 @@
+﻿<CascadingAuthenticationState>
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="w=100 justify-content-center m-5">
+                <p class="text-center" role="alert">Podane adress nie istnieje.</p>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
+</CascadingAuthenticationState>
