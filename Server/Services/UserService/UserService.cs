@@ -11,15 +11,45 @@ namespace Dziennik.Server.Services.UserService
         private const int iterations = 35001;
         public UserService(DataContext context, IHttpContextAccessor accessor) : base(context, accessor) { }
 
-        public List<UserResponse> GetUsers()
+        public List<UserResponse> GetUsers(string type)
         {
-            var users = _context.Users.Select(GetUserResponse).ToList();
-            return users;
+            if (type == null)
+            {
+                return null;
+            } 
+            else if (type == Role.Student)
+            {
+               return _context.Students.Select(GetUserResponse).ToList();
+            }
+            else if (type == Role.Teacher)
+            {
+                return _context.Teachers.Select(GetUserResponse).ToList();
+            } 
+            else
+            {
+                return _context.HeadAdmins.Select(GetUserResponse).ToList();
+            }
         }
 
-        public UserResponse GetUser(int id)
-        { 
-            var user = _context.Users.FirstOrDefault(h => h.Id == id);
+        public UserResponse GetUser(int id, string type)
+        {
+            User user;
+            if (type == null)
+            {
+                return null;
+            }
+            else if (type == Role.Student)
+            {
+                user = _context.Students.FirstOrDefault(h => h.Id == id);
+            }
+            else if (type == Role.Teacher)
+            {
+                user = _context.Teachers.FirstOrDefault(h => h.Id == id);
+            }
+            else
+            {
+                user = _context.HeadAdmins.FirstOrDefault(h => h.Id == id);
+            }
             if (user == null)
             {
                 return null;
@@ -30,19 +60,48 @@ namespace Dziennik.Server.Services.UserService
         public bool PostUser(UserRequest user)
         {
             var hash = CreateHashPassword(user.Password);
-            var newUser = new User()
+            if (user.Role == Role.Student)
             {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Login = user.Login,
-                Password = hash,
-                Birthday = user.Birthday,
-                Role = user.Role,
-            };
-
-            Console.WriteLine(newUser);
-            _context.Users.Add(newUser);
+                var newUser = new Student()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Login = user.Login,
+                    Password = hash,
+                    Birthday = user.Birthday.ToUniversalTime(),
+                    Role = user.Role,
+                };
+                _context.Students.Add(newUser);
+            }
+            else if (user.Role == Role.Teacher)
+            {
+                var newUser = new Teacher()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Login = user.Login,
+                    Password = hash,
+                    Birthday = user.Birthday.ToUniversalTime(),
+                    Role = user.Role,
+                };
+                _context.Teachers.Add(newUser);
+            }
+            else 
+            {
+                var newUser = new HeadAdmin()
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Login = user.Login,
+                    Password = hash,
+                    Birthday = user.Birthday.ToUniversalTime(),
+                    Role = user.Role,
+                };
+                _context.HeadAdmins.Add(newUser);
+            }
             _context.SaveChanges();
 
             return true;
@@ -50,24 +109,57 @@ namespace Dziennik.Server.Services.UserService
 
         public bool PutUser(int id, UserRequest user)
         {
-            var existingUser = _context.Users.FirstOrDefault(h => h.Id == id);
-
-            existingUser.Login = user.Login;
-            existingUser.FirstName = user.FirstName;
-            existingUser.LastName = user.LastName;
-            existingUser.Email = user.Email;
-            existingUser.Birthday = user.Birthday;
-            existingUser.Role = user.Role;
-
+            if (user.Role == Role.Student)
+            {
+                var existingUser = _context.Students.FirstOrDefault(h => h.Id == id);
+                existingUser.Login = user.Login;
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+                existingUser.Birthday = user.Birthday.ToUniversalTime();
+                existingUser.Role = user.Role;
+            }
+            else if (user.Role == Role.Teacher)
+            {
+                var existingUser = _context.Teachers.FirstOrDefault(h => h.Id == id);
+                existingUser.Login = user.Login;
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+                existingUser.Birthday = user.Birthday.ToUniversalTime();
+                existingUser.Role = user.Role;
+            }
+            else
+            {
+                var existingUser = _context.HeadAdmins.FirstOrDefault(h => h.Id == id);
+                existingUser.Login = user.Login;
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+                existingUser.Birthday = user.Birthday.ToUniversalTime();
+                existingUser.Role = user.Role;
+            }
             _context.SaveChanges();
 
             return true;
         }
-        public bool DeleteUser(int id)
+        public bool DeleteUser(int id, string type)
         {
-            var existingUser = _context.Users.FirstOrDefault(h => h.Id == id);
-
-            _context.Users.Remove(existingUser);
+            if (type == Role.Student)
+            {
+                var existingUser = _context.Students.FirstOrDefault(h => h.Id == id);
+                _context.Students.Remove(existingUser);
+            }
+            else if (type == Role.Teacher)
+            {
+                var existingUser = _context.Teachers.FirstOrDefault(h => h.Id == id);
+                _context.Teachers.Remove(existingUser);
+            }
+            else
+            {
+                var existingUser = _context.HeadAdmins.FirstOrDefault(h => h.Id == id);
+                _context.HeadAdmins.Remove(existingUser);
+            }
             _context.SaveChanges();
            
             return true;
@@ -89,12 +181,22 @@ namespace Dziennik.Server.Services.UserService
 
         public User GetUserByLogin(string login)
         {
-            var user = _context.Users.FirstOrDefault(h => h.Login == login);
-            if (user == null)
+            var stud = _context.Students.FirstOrDefault(h => h.Login == login);
+            var teach = _context.Teachers.FirstOrDefault(h => h.Login == login);
+            var admin = _context.HeadAdmins.FirstOrDefault(h => h.Login == login);
+            if (stud != null)
             {
-                return null;
+                return stud;
+            } 
+            else if (teach != null)
+            {
+                return teach;
             }
-            return user;
+            else if (admin != null)
+            {
+                return admin;
+            }
+            return null;
         }
 
         public string GetMyName()
@@ -139,6 +241,39 @@ namespace Dziennik.Server.Services.UserService
 
                 return inputHashedPassword.Equals(hashedPassword, StringComparison.OrdinalIgnoreCase);
             }
+        }
+
+        public List<ShortListResponse> GetShortListResponse(string type)
+        {
+            var users = new List<ShortListResponse>();
+            if (type == Role.Student)
+            {
+                users = _context.Students.Select(CreateShortList).ToList();
+            }
+            else if (type == Role.Teacher)
+            {
+                users = _context.Teachers.Select(CreateShortList).ToList();
+            }
+            else if (type == Role.HeadAdmin)
+            {
+                users = _context.HeadAdmins.Select(CreateShortList).ToList();
+            }
+            
+            if (users.Count == 0)
+            {
+                return null;
+            }
+            return users;
+        }
+
+        private ShortListResponse CreateShortList(User user)
+        {
+            return new ShortListResponse
+            {
+                Id = user.Id,
+                FullName = user.FirstName + " " + user.LastName,
+                Login = user.Login,
+            };
         }
     }
 }

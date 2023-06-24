@@ -5,7 +5,11 @@
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public List<User.User> Students { get; set; }
-        public User.User Teacher { get; set; }
+        
+        public List<Student> Students { get; set; } = new List<Student>();
+
+        public List<Teacher> Teachers { get; set; } = new List<Teacher>();
+
+        public List<Mark.Mark> Marks { get; set; } = new List<Mark.Mark>();
     }
 }

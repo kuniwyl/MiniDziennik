@@ -26,8 +26,8 @@ namespace Dziennik.Server.Services.MarkService
 
         public bool PostMark(MarkRequest mark)
         {
-            var student = _context.Users.FirstOrDefault(s => s.Id == mark.StudentId);
-            var teacher = _context.Users.FirstOrDefault(t => t.Id == mark.TeacherId);
+            var student = _context.Students.FirstOrDefault(s => s.Id == mark.StudentId);
+            var teacher = _context.Teachers.FirstOrDefault(t => t.Id == mark.TeacherId);
             var subject = _context.Subjects.FirstOrDefault(s => s.Id == mark.SubjectId);
 
             if (student == null || teacher == null || subject == null)
@@ -37,13 +37,12 @@ namespace Dziennik.Server.Services.MarkService
 
             var newMark = new Mark
             {
-                Id = mark.Id,
                 Value = mark.Value,
                 Importance = mark.Importance,
                 Title = mark.Title,
                 Description = mark.Description,
-                CreatedAt = mark.CreatedAt,
-                UpdatedAt = mark.UpdatedAt,
+                CreatedAt = DateTime.Now.ToUniversalTime(),
+                UpdatedAt = DateTime.Now.ToUniversalTime(),
                 Student = student,
                 Teacher = teacher,
                 Subject = subject,
@@ -63,8 +62,8 @@ namespace Dziennik.Server.Services.MarkService
                 return false;
             }
 
-            var student = _context.Users.FirstOrDefault(s => s.Id == newMark.StudentId);
-            var teacher = _context.Users.FirstOrDefault(t => t.Id == newMark.TeacherId);
+            var student = _context.Students.FirstOrDefault(s => s.Id == newMark.StudentId);
+            var teacher = _context.Teachers.FirstOrDefault(t => t.Id == newMark.TeacherId);
             var subject = _context.Subjects.FirstOrDefault(s => s.Id == newMark.SubjectId);
 
             if (student == null || teacher == null || subject == null)
@@ -76,7 +75,7 @@ namespace Dziennik.Server.Services.MarkService
             mark.Importance = newMark.Importance;
             mark.Title = newMark.Title;
             mark.Description = newMark.Description;
-            mark.UpdatedAt = newMark.UpdatedAt;
+            mark.UpdatedAt = DateTime.Now.ToUniversalTime();
             mark.Student = student;
             mark.Teacher = teacher;
             mark.Subject = subject;
@@ -112,9 +111,9 @@ namespace Dziennik.Server.Services.MarkService
                 Description = mark.Description,
                 CreatedAt = mark.CreatedAt,
                 UpdatedAt = mark.UpdatedAt,
-                StudentId = mark.Student.Id,
-                TeacherId = mark.Student.Id,
-                SubjectId = mark.Student.Id
+                StudentId = mark.StudentId,
+                TeacherId = mark.TeacherId,
+                SubjectId = mark.SubjectId
             };
         }
     }

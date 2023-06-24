@@ -1,4 +1,10 @@
-﻿namespace Dziennik.Client.Service.MarkService
+﻿//REFIT
+/*
+ [Get(url)]
+Task<ApiResponse<Object>> NAzwaMetody([Body] request)
+ */
+
+namespace Dziennik.Client.Service.MarkService
 {
     public class MarkService : IMarkService
     {
@@ -9,17 +15,20 @@
             _httpClient = httpClient;
         }
 
-        public async Task<List<MarkResponse>> GetMarks()
+        public List<MarkResponse> Marks { get; set; } = new List<MarkResponse>();
+        public MarkResponse Mark { get; set; } = new MarkResponse();
+
+        public async Task GetMarks()
         {
             var response = await _httpClient.GetFromJsonAsync<List<MarkResponse>>("api/mark");
-            return response;
+            Marks = response;
         }
 
-        public async Task<MarkResponse> GetMark(int? id = null)
+        public async Task GetMark(int? id = null)
         {
             var url = id.HasValue ? $"api/mark/{id}" : "api/mark";
             var response = await _httpClient.GetFromJsonAsync<MarkResponse>(url);
-            return response;
+            Mark = response;
         }
 
         public async Task<bool> PostMark(MarkRequest mark)
@@ -44,8 +53,7 @@
         {
             if (response.IsSuccessStatusCode)
             {
-                bool result = JsonSerializer.Deserialize<bool>(response.Content.ToString());
-                return result;
+                return true;
             }
             return false;
         }

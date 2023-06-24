@@ -3,7 +3,6 @@ global using Dziennik.Shared.Mark;
 global using Dziennik.Shared.User;
 global using Dziennik.Shared.Subject;
 
-global using Dziennik.Client.Service;
 global using Dziennik.Client.Service.MarkService;
 global using Dziennik.Client.Service.StudentService;
 global using Dziennik.Client.Service.SubjectService;
@@ -28,9 +27,9 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddAuthorizationCore();
 
+builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMarkService, MarkService>();
-builder.Services.AddScoped<ISubjectService, SubjectService>();
 
 
 await builder.Build().RunAsync();

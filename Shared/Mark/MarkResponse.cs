@@ -4,25 +4,25 @@ namespace Dziennik.Shared.Mark
 {
     public class MarkResponse
     {
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("id")]
         public int Id { get; set; }
-        [JsonPropertyName("id")]
-        public int Value { get; set; } = 0;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("value")]
+        public int Value { get; set; } = 1;
+        //[JsonPropertyName("importance")]
         public int Importance { get; set; } = 1;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("title")]
         public string Title { get; set; } = string.Empty;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("createAt")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("updateAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("studentId")]
         public int StudentId { get; set; }
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("teacherId")]
         public int TeacherId { get; set; }
-        [JsonPropertyName("id")]
+        //[JsonPropertyName("subjectId")]
         public int SubjectId { get; set; }
     }
 }

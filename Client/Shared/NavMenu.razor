@@ -20,9 +20,6 @@
                 <AuthorizeView>
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link" @onclick="NavigateToTeachers">Nauczyciele</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" @onclick="NavigateToSubjects">Zajęcia</a>
                         </li>
                         <li class="nav-item">
@@ -50,8 +47,7 @@
 
 @code {
     private void NavigateToIndex() => navMaganer.NavigateTo("/");
-    private void NavigateToStudents() => navMaganer.NavigateTo("/students");
-    private void NavigateToTeachers() => navMaganer.NavigateTo("/teachers");
+    private void NavigateToStudents() => navMaganer.NavigateTo("/users");
     private void NavigateToSubjects() => navMaganer.NavigateTo("/subjects");
     private void NavigateToMarks() => navMaganer.NavigateTo("/marks");
     private void NavigateToLogin() => navMaganer.NavigateTo("/login");

@@ -16,9 +16,9 @@ namespace Dziennik.Server.Controllers
 
         [HttpGet]
         [Authorize(Roles = "HeadAdmin")]
-        public async Task<ActionResult<List<MarkResponse>>> GetUsers()
+        public async Task<ActionResult<List<UserResponse>>> GetUsers(string type)
         {
-            var result = _userService.GetUsers();
+            var result = _userService.GetUsers(type);
             if (result == null)
             {
                 return NotFound();
@@ -28,9 +28,10 @@ namespace Dziennik.Server.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<MarkResponse>> GetUser(int id)
+        public async Task<ActionResult<UserResponse>> GetUser(int id, string type)
         {
-            var result = _userService.GetUser(id);
+            Console.WriteLine(type);
+            var result = _userService.GetUser(id, type);
             if (result == null)
             {
                 return NotFound();
@@ -39,7 +40,7 @@ namespace Dziennik.Server.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult<bool>> PostUser(UserRequest request)
         {
             var result = _userService.PostUser(request);
@@ -64,12 +65,24 @@ namespace Dziennik.Server.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<ActionResult<bool>> DeleteUser(int id)
+        public async Task<ActionResult<bool>> DeleteUser(int id, string type)
         {
-            var result = _userService.DeleteUser(id);
+            var result = _userService.DeleteUser(id, type);
             if (result == false)
             {
                 return NotFound();
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("shortList")]
+        [Authorize]
+        public async Task<ActionResult<List<ShortListResponse>>> GetShortList(string type)
+        {
+            var result = _userService.GetShortListResponse(type);
+            if (result == null)
+            {
+                return NoContent();
             }
             return Ok(result);
         }

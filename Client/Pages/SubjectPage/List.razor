@@ -1,0 +1,98 @@
+﻿@page "/subjects"
+
+<div class="row">
+    <div class="mx-auto col-12 col-sm-10 m-4">
+        <h3>Lista przedmiotów</h3>
+    </div>
+
+    <div class="d-flex flex-row justify-content-around">
+        <div class="d-flex flex-row">
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => AddSubject()">Dodaj przedmiot</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mx-auto col-12 col-sm-10">
+        @if (userService.Users.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Imie</th>
+                        <th scope="col">Opis</th>
+                        @if (Teachers.Count > 0)
+                        {
+                            <th scope="col">Nauczyciel</th>
+                        }
+                        <th scope="col">Licza uczniów</th>
+                        <th class="text-center">Edytuj</th>
+                        <th class="text-center">Usuń</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (SubjectResponse subject in subjectService.Subjects)
+                    {
+                        <tr>
+                            <td>@subject.Name</td>
+                            <td>@subject.Description</td>
+                            @if (Teachers.Count > 0)
+                            {
+                                <td>@Teachers.First(s => s.Id == subject.TeacherId).FullName</td>
+                            }
+                            <td>@subject.StudentsId.Count</td>
+                            <td class="text-center" @onclick="() => EditSubject( subject.Id )"><i class="fa-solid fa-pen-to-square"></i></td>
+                            <td class="text-center" @onclick="() => RemoveSubject( subject.Id )"><i class="fa-solid fa-trash"></i></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="m-4 text-center">
+                <p>Brak przdmiotów</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<ShortListResponse> Teachers { get; set; } = new List<ShortListResponse>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await subjectService.GetSubjects();
+        Teachers = await userService.ShortListResponse(Role.Teacher);
+        await base.OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    public void AddSubject()
+    {
+        navMaganer.NavigateTo("/subjects/add");
+    }
+
+    public void EditSubject(int id)
+    {
+        navMaganer.NavigateTo("/subjects/" + id.ToString());
+    }
+
+    public async void RemoveSubject(int id)
+    {
+        var res = await subjectService.DeleteSubject(id);
+        if (res)
+        {
+            // jeśli prawda
+            await subjectService.GetSubjects();
+            StateHasChanged();
+        }
+        else
+        {
+            // jeśli nie 
+        }
+
+    }
+
+
+}

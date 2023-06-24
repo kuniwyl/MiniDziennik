@@ -16,9 +16,9 @@ namespace Dziennik.Server.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<SubjectResponse>>> GetSubjects()
+        public async Task<ActionResult<List<SubjectResponse>>> GetSubjects(CancellationToken cancellationToken)
         {
-            var result = _subjectService.GetSubjects();
+            var result = await _subjectService.GetSubjects(cancellationToken);
             return Ok(result);
         }
 
@@ -90,6 +90,18 @@ namespace Dziennik.Server.Controllers
             if (result == false)
             {
                 return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("shortList")]
+        [Authorize]
+        public async Task<ActionResult<List<ShortSubjectResponse>>> GetShortList()
+        {
+            var result = _subjectService.GetShortSubjects();
+            if (result == null)
+            {
+                return BadRequest();
             }
             return Ok(result);
         }

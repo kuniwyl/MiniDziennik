@@ -1,0 +1,121 @@
+﻿@page "/marks"
+
+<div class="row">
+    <div class="mx-auto col-12 col-sm-10 m-4">
+        <h3>Lista ocen</h3>
+    </div>
+
+    <div class="d-flex flex-row justify-content-around">
+        <div class="d-flex flex-row">
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => AddMark()">Dodaj ocenę</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mx-auto col-12 col-sm-10">
+        @if (markService.Marks.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nazwa</th>
+                        @if (Teachers.Count > 0)
+                        {
+                            <th scope="col">Nauczyciel</th>
+                        }
+                        @if (Students.Count > 0)
+                        {
+                            <th scope="col">Uczeń</th>
+                        }
+                        @if (Subjects.Count > 0)
+                        {
+                            <th scope="col">Przedmiot</th>
+                        }
+                        <th scope="col">Ocena</th>
+                        <th scope="col">Waga</th>
+                        <th scope="col">Data dodania</th>
+                        <th class="text-center">Edytuj</th>
+                        <th class="text-center">Usuń</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (MarkResponse mark in markService.Marks)
+                    {
+                        <tr>
+                            <td>@mark.Title</td>
+                            @if (Teachers.Count > 0)
+                            {
+                                <td>@Teachers.FirstOrDefault(h => h.Id == mark.TeacherId)?.FullName</td>
+                            }
+                            @if (Students.Count > 0)
+                            {
+                                <td>@Students.FirstOrDefault(h => h.Id == mark.StudentId)?.FullName</td>
+                            }
+                            @if (Subjects.Count > 0)
+                            {
+                                <td>@Subjects.FirstOrDefault(h => h.Id == mark.SubjectId)?.Name</td>
+                            }
+                            <td>@mark.Value</td>
+                            <td>@mark.Importance</td>
+                            <td>@mark.CreatedAt</td>
+                            <td class="text-center" @onclick="() => EditMark( mark.Id )"><i class="fa-solid fa-pen-to-square"></i></td>
+                            <td class="text-center" @onclick="() => DeleteMark( mark.Id )"><i class="fa-solid fa-trash"></i></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="m-4 text-center">
+                <p>Brak ocen</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<ShortListResponse> Teachers { get; set; } = new List<ShortListResponse>();
+    private List<ShortListResponse> Students { get; set; } = new List<ShortListResponse>();
+    private List<ShortSubjectResponse> Subjects { get; set; } = new List<ShortSubjectResponse>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (markService.Marks.Count == 0)
+        {
+            await markService.GetMarks();
+        }
+        Teachers = await userService.ShortListResponse(Role.Teacher);
+        Students = await userService.ShortListResponse(Role.Student);
+        Subjects = await subjectService.GetShortList();
+        await base.OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    private async void AddMark()
+    {
+        navMaganer.NavigateTo("/marks/add");
+    }
+
+    private async void EditMark(int id)
+    {
+        navMaganer.NavigateTo("/marks/" + id.ToString());
+    }
+
+    private async void DeleteMark(int id)
+    {
+        var res = await markService.DeleteMark(id);
+        if (res)
+        {
+            // jeśli prawda
+            await markService.GetMarks();
+            StateHasChanged();
+        }
+        else
+        {
+            // jeśli nie
+        }
+    }
+
+}

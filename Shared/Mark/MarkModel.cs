@@ -9,8 +9,14 @@
         public string Description { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        public User.User Student { get; set; } = new User.User();
-        public User.User Teacher { get; set; } = new User.User();
+
+        public int StudentId { get; set; }
+        public Student Student { get; set; } = new Student();
+
+        public int TeacherId { get; set; }
+        public Teacher Teacher { get; set; } = new Teacher();
+
+        public int SubjectId { get; set; }
         public Subject.Subject Subject { get; set; } = new Subject.Subject();
     }
 }

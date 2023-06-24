@@ -1,35 +1,76 @@
-﻿@page "/students"
+﻿@page "/users"
 
 <div class="row">
-    <div class="mx-auto col-12 col-sm-10">
+    <div class="mx-auto col-12 col-sm-10 m-4">
         <h3>Lista uczniów</h3>
     </div>
 
-    <div class="mx-auto col-12 col-sm-10">
-        <button>Dodaj ucznia</button>
+    <div class="d-flex flex-row justify-content-around">
+        <div class="d-flex flex-row">
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => AddUser(Role.Student)">Dodaj ucznia</button>
+            </div>
+
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => AddUser(Role.Teacher)">Dodaj nauczyciela</button>
+            </div>
+
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => AddUser(Role.HeadAdmin)">Dodaj admina</button>
+            </div>
+        </div>
+
+        <div class="d-flex flex-row ">
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => Show(Role.Student)">Pokaż uczniów</button>
+            </div>
+
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => Show(Role.Teacher)">Pokaż nauczycieli</button>
+            </div>
+
+            <div class="m-2">
+                <button class="btn btn-dark" @onclick="() => Show(Role.HeadAdmin)">Pokaż adminów</button>
+            </div>
+        </div>
     </div>
 
     <div class="mx-auto col-12 col-sm-10">
         @if (userService.Users.Count > 0)
         {
-            @foreach (User user in userService.Users)
-            {
-                <div class="row p-1 m-2 ">
-                    <div class="col-8 d-flex align-content-center">
-                        <span class="text p-1">@user.FirstName @user.LastName</span>
-                        <span class="text p-1">@user.Birthday</span>
-                        <span class="text p-1">@user.Login</span>
-                    </div>
-                    <div class="col-4 justify-content-end">
-                        <button class="btn btn-dark">Edytuj</button>
-                        <button class="btn btn-dark">Usuń</button>
-                    </div>
-                </div>
-            }
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Imie</th>
+                        <th scope="col">Nazwisko</th>
+                        <th scope="col">Data urodzenia</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Login</th>
+                        <th class="text-center">Edytuj</th>
+                        <th class="text-center">Usuń</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (User user in userService.Users)
+                    {
+                        <tr>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Birthday</td>
+                            <td>@user.Email</td>
+                            <td>@user.Login</td>
+                            <td class="text-center" @onclick="() => EditStudent( user.Id, user.Role )"><i class="fa-solid fa-pen-to-square"></i></td>
+                            <td class="text-center" @onclick="() => DeleteStudent( user.Id, user.Role )"><i class="fa-solid fa-trash"></i></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         else
         {
-            <p>Brak użytkowników</p>
+            <div class="m-4 text-center">
+                <p>Brak użytkowników</p>
+            </div>
         }
     </div>
 </div>
@@ -37,7 +78,44 @@
 @code {
     protected async override Task OnInitializedAsync()
     {
-        await userService.GetUsers();
+        Console.WriteLine(userService.Users.Count);
+        if (userService.Users.Count == 0)
+        {
+            await userService.GetUsers(userService.CurrentRole);
+        }
         await base.OnInitializedAsync();
+    }
+
+    private async void Show(string type)
+    {
+        userService.CurrentRole = type;
+        await userService.GetUsers(userService.CurrentRole);
+        StateHasChanged();
+    }
+
+    private void AddUser(string type)
+    {
+        navMaganer.NavigateTo("/users/add/" + type);
+    }
+
+    private void EditStudent(int id, string type)
+    {
+        navMaganer.NavigateTo("/users/" + id.ToString() + "/" + type);
+    }
+
+    private async void DeleteStudent(int id, string type)
+    {
+        // jakieś potwierdzenie
+        var res = await userService.DeleteUser(id, type);
+        if (res)
+        {
+            // jeśli tak
+            await userService.GetUsers(userService.CurrentRole);
+        }
+        else
+        {
+            // jeślie nie
+        }
+        StateHasChanged();
     }
 }

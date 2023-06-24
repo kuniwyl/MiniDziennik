@@ -4,6 +4,7 @@
     {
         List<SubjectResponse> GetSubjects();
         SubjectResponse GetSubject(int id);
+        List<ShortSubjectResponse> GetShortSubjects();
         bool PostSubject(SubjectRequest subject);
         bool PutSubject(int id, SubjectRequest subject);
         bool DeleteSubject(int id);

@@ -1,0 +1,166 @@
+﻿@page "/subjects/{id:int}"
+@page "/subjects/add"
+
+
+<div>
+    <div class="row my-4 justify-content-md-center">
+        <h3 class="col-12 text-center col-md-8 col-sm-12">Dodaj przedmiot</h3>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="firstName">Nazwa:</label>
+            <input id="firstName" class="form-control" type="text" rows="4" @bind="@subject.Name" />
+        </div>
+    </div>
+
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="lastName">Opis:</label>
+            <textarea id="lastName" class="form-control" type="text" @bind="@subject.Description" />
+        </div>
+    </div>
+
+    @if (teachers.Count > 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="exampleSelect">Wybierz nauczyciela:</label>
+                <select class="form-control" id="exampleSelect" @bind="@teacher">
+                    @foreach (var item in teachers)
+                    {
+                        <option value="@item.Id">@item.FullName : @item.Login</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (students.Count > 0 && students.Count > chosenStudents.Count)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="exampleSelect">Dodaj ucznia:</label>
+                <select class="form-control" id="exampleSelect" @bind="@student">
+                    @foreach (var item in students.Where(s => !chosenStudents.Contains(s.Id)))
+                    {
+                        <option value="@item.Id">@item.Id -> @item.FullName : @item.Login</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6 text-center">
+                <button class="m-2 btn btn-dark" @onclick="AddStudent">Dodaj</button>
+            </div>
+        </div>
+    }
+
+    @if (chosenStudents.Count > 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <p>Uczniowie</p>
+                <ul>
+                    @foreach (var (item, idx) in students.Where((s, index) => chosenStudents.Contains(s.Id)).Select((s, index) => (s, index)))
+                    {
+                        <li class="m-1">@item.FullName : @item.Login <button class="btn btn-dark" @onclick="() => RemoveStudent(idx)">Usuń</button></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    <div class="row my-3 justify-content-center">
+        <div class="col-8 col-sm-6 col-md-4 col-xl-2">
+            <button @onclick="SaveSubject" class="d-block w-100 btn btn-dark mx-auto">Zapisz</button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; } = 0;
+
+    private SubjectResponse subject = new SubjectResponse();
+
+    private List<ShortListResponse> teachers = new List<ShortListResponse>();
+    private List<ShortListResponse> students = new List<ShortListResponse>();
+    private List<int> chosenStudents = new List<int>();
+    private int student;
+    private int teacher;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            if (subjectService.Subject?.Id != Id)
+            {
+                await subjectService.GetSubject(Id);
+            }
+
+            if (subjectService.Subject != null)
+            {
+                subject.Name = subjectService.Subject.Name;
+                subject.Description = subjectService.Subject.Name;
+                subject.TeacherId = subjectService.Subject.TeacherId;
+                teacher = subjectService.Subject.TeacherId;
+                subject.StudentsId = subjectService.Subject.StudentsId;
+                chosenStudents = subjectService.Subject.StudentsId;
+            }
+        }
+
+        teachers = await userService.ShortListResponse(Role.Teacher);
+        students = await userService.ShortListResponse(Role.Student);
+        student = students.Where(s => !chosenStudents.Contains(s.Id)).First().Id;
+        StateHasChanged();
+    }
+
+    private void AddStudent()
+    {
+        if (student != -1)
+        {
+            chosenStudents.Add(student);
+            if (students.Count > chosenStudents.Count)
+                student = students.Where(s => !chosenStudents.Contains(s.Id)).First().Id;
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveStudent(int id)
+    {
+        chosenStudents.RemoveAt(id);
+        if (students.Count == 1 + chosenStudents.Count)
+            student = students.Where(s => !chosenStudents.Contains(s.Id)).First().Id;
+        StateHasChanged();
+    }
+
+    private async void SaveSubject()
+    {
+        var res = false;
+        subject.TeacherId = teacher;
+        subject.StudentsId = chosenStudents;
+        if (Id > 0)
+        {
+            res = await subjectService.PutSubject(Id, subjectService.CreateSubjectRequest(subject));
+        }
+        else
+        {
+            res = await subjectService.PostSubject(subjectService.CreateSubjectRequest(subject));
+        }
+
+        if (res)
+        {
+            subjectService.GetSubjects();
+            StateHasChanged();
+            navMaganer.NavigateTo("/subjects");
+        }
+        else
+        {
+            // Handle error if save operation fails
+        }
+    }
+}

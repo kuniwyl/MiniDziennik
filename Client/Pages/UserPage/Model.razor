@@ -1,0 +1,156 @@
+﻿@page "/users/{id:int}/{type}"
+@page "/users/add/{type}"
+
+<div>
+    <div class="row my-4 justify-content-md-center">
+        <h3 class="col-12 text-center col-md-8 col-sm-12">Dodaj użytkownika</h3>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="firstName">Imie:</label>
+            <input id="firstName" class="form-control" type="text" @bind="@user.FirstName" />
+        </div>
+    </div>
+
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="lastName">Nazwisko:</label>
+            <input id="lastName" class="form-control" type="text" @bind="@user.LastName" />
+        </div>
+    </div>
+
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="login">Login:</label>
+            <input id="login" class="form-control" type="text" @bind="@user.Login" />
+        </div>
+    </div>
+
+    @if (Id == 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="password">Hasło:</label>
+                <input id="password" class="form-control" type="password" @bind="@user.Password" />
+            </div>
+        </div>
+
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="rePassword">Powtórz hasło:</label>
+                <input id="rePassword" class="form-control" type="password" @bind="@rePassword" />
+            </div>
+        </div>
+    }
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="email">Email:</label>
+            <input id="email" class="form-control" type="text" @bind="@user.Email" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="birthday">Data urodzenia:</label>
+            <input id="birthday" class="form-control" type="date" @bind="@user.Birthday" />
+        </div>
+    </div>
+
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="role">Rola:</label>
+            <input id="role" disabled class="form-control" type="text" @bind="@user.Role" />
+        </div>
+    </div>
+
+    <div class="row my-3 justify-content-center">
+        <div class="col-8 col-sm-6 col-md-4 col-xl-2">
+            <button @onclick="SaveUser" class="d-block w-100 btn btn-dark mx-auto">Zapisz</button>
+        </div>
+    </div>
+
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; } = 0;
+
+    [Parameter]
+    public string type { get; set; } = "";
+
+    private User user = new User();
+    private string rePassword = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            if (userService.User?.Id != Id)
+            {
+                await userService.GetUser(Id, type);
+            }
+
+            if (userService.User != null)
+            {
+                user.FirstName = userService.User.FirstName;
+                user.LastName = userService.User.LastName;
+                user.Login = userService.User.Login;
+                user.Email = userService.User.Email;
+                user.Birthday = userService.User.Birthday;
+                user.Role = userService.User.Role;
+            }
+        }
+        else if (type != "")
+        {
+            if (type == Role.Student)
+            {
+                user.Role = Role.Student;
+            }
+            else if (type == Role.Teacher)
+            {
+                user.Role = Role.Teacher;
+            }
+            else
+            {
+                user.Role = Role.HeadAdmin;
+            }
+        }
+    }
+
+    private async void SaveUser()
+    {
+        var res = false;
+        if (Id > 0)
+        {
+            res = await userService.PutUser(Id, userService.CreateUserRequest(user));
+        }
+        else
+        {
+            if (user.Password == rePassword)
+            {
+                res = await userService.PostUser(userService.CreateUserRequest(user));
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        if (res)
+        {
+            await userService.GetUsers(Role.Student);
+            navMaganer.NavigateTo("/users");
+            StateHasChanged();
+        }
+        else
+        {
+            // Handle error if save operation fails
+        }
+    }
+}

@@ -5,5 +5,10 @@
 }
 
 .text {
-    font-size: 1rem;
+    font-size: 1.4rem;
+}
+
+.myborder {
+    border: 2px black solid;
+    border-radius: 15px;
 }

@@ -1,0 +1,175 @@
+﻿@page "/marks/{id:int}"
+@page "/marks/add"
+
+
+<div>
+    <div class="row my-4 justify-content-md-center">
+        <h3 class="col-12 text-center col-md-8 col-sm-12">Dodaj ocene</h3>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="firstName">Value:</label>
+            <input id="firstName" class="form-control" type="text" rows="4" @bind="@mark.Value" />
+        </div>
+    </div>
+
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="lastName">Importance:</label>
+            <textarea id="lastName" class="form-control" type="text" @bind="@mark.Importance" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="title">Nazwa:</label>
+            <textarea id="title" class="form-control" type="text" @bind="@mark.Title" />
+        </div>
+    </div>
+
+    <div class="row my-2 justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6">
+            <label for="desc">Opis:</label>
+            <textarea id="desc" class="form-control" type="text" @bind="@mark.Description" />
+        </div>
+    </div>
+
+    @if (Students.Count > 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="exampleSelect">Wybiersz ucznia:</label>
+                <select class="form-control" id="choseStudent" @bind="@student">
+                    @foreach (var item in Students)
+                    {
+                        <option value="@item.Id">@item.FullName : @item.Login</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (Teachers.Count > 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="exampleSelect">Wybiersz nauczyciela:</label>
+                <select class="form-control" id="choseTeacher" @bind="@teacher">
+                    @foreach (var item in Teachers)
+                    {
+                        <option value="@item.Id">@item.FullName : @item.Login</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (Subjects.Count > 0)
+    {
+        <div class="row my-2 justify-content-center">
+            <div class="col-12 col-sm-8 col-md-6">
+                <label for="exampleSelect">Wybiersz przedmiot:</label>
+                <select class="form-control" id="choseSubject" @bind="@subject">
+                    @foreach (var item in Subjects)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
+    <div class="row my-3 justify-content-center">
+        <div class="col-8 col-sm-6 col-md-4 col-xl-2">
+            <button @onclick="SaveMark" class="d-block w-100 btn btn-dark mx-auto">Zapisz</button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; } = 0;
+
+    private MarkRequest mark = new MarkRequest();
+
+    private List<ShortListResponse> Teachers = new List<ShortListResponse>();
+    private List<ShortListResponse> Students = new List<ShortListResponse>();
+    private List<ShortSubjectResponse> Subjects = new List<ShortSubjectResponse>();
+
+    private int subject;
+    private int student;
+    private int teacher;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            if (markService.Mark?.Id != Id)
+            {
+                await markService.GetMark(Id);
+            }
+
+            if (markService.Mark != null)
+            {
+                mark.Id = markService.Mark.Id;
+                mark.Value = markService.Mark.Value;
+                mark.Importance = markService.Mark.Importance;
+                mark.Title = markService.Mark.Title;
+                mark.Description = markService.Mark.Description;
+                subject = markService.Mark.SubjectId;
+                teacher = markService.Mark.TeacherId;
+                student = markService.Mark.StudentId;
+            }
+        }
+
+        Teachers = await userService.ShortListResponse(Role.Teacher);
+        Students = await userService.ShortListResponse(Role.Student);
+        Subjects = await subjectService.GetShortList();
+
+        if (student < 1 && Students.Count > 0)
+        {
+            student = Students.First().Id;
+        }
+
+        if (teacher < 1 && Teachers.Count > 0)
+        {
+            teacher = Teachers.First().Id;
+        }
+
+        if (subject < 1 && Subjects.Count > 0)
+        {
+            subject = Subjects.First().Id;
+        }
+        StateHasChanged();
+    }
+
+    private async void SaveMark()
+    {
+        var res = false;
+        mark.TeacherId = teacher;
+        mark.SubjectId = subject;
+        mark.StudentId = student;
+        if (Id > 0)
+        {
+            res = await markService.PutMark(Id, mark);
+        }
+        else
+        {
+            res = await markService.PostMark(mark);
+        }
+
+        if (res)
+        {
+            await markService.GetMarks();
+            StateHasChanged();
+            navMaganer.NavigateTo("/marks");
+        }
+        else
+        {
+            // Handle error if save operation fails
+        }
+    }
+}
